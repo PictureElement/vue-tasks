@@ -1,12 +1,10 @@
 <template>
   <div>
-    <div class="columns">
-      <!-- FORM -->
-      <div class="column">
-        <article class="message is-medium">
-          <div class="message-header">
-            <p>Add a Task</p>
-          </div>
+    <!-- FORM -->
+    <div class="modal">
+      <div class="modal-background"></div>
+      <div class="modal-content">
+        <article class="message">
           <div class="message-body">
             <div class="field">
               <label class="label">Title</label>
@@ -34,20 +32,19 @@
           </div>
         </article>
       </div>
-      <!-- TASK LIST -->
-      <div class="column">
-        <div v-for="(task, index) in tasks" :key="task.id">
-          <article class="message is-small">
-            <div class="message-header">
-              <p>{{ task.title }} | {{ task.date }}</p>
-              <button class="delete" aria-label="delete" v-on:click="deleteTask(index)"></button>
-            </div>
-            <div v-if="task.description" class="message-body">
-              {{ task.description }}
-            </div>
-          </article>
+      <button class="modal-close is-large" aria-label="close"></button>
+    </div>
+    <!-- TASK LIST -->
+    <div v-for="(task, index) in tasks" :key="task.id">
+      <article class="message is-small">
+        <div class="message-header">
+          <p>{{ task.title }} | {{ task.date }}</p>
+          <button class="delete" aria-label="delete" v-on:click="deleteTask(index)"></button>
         </div>
-      </div>
+        <div v-if="task.description" class="message-body">
+          {{ task.description }}
+        </div>
+      </article>
     </div>
   </div>
 </template>
