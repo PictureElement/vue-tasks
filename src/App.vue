@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <section class="hero is-primary block">
+    <section class="mb-0 hero is-primary block">
       <div class="hero-body">
         <div class="container">
           <h1 class="title">
@@ -12,7 +12,7 @@
         </div>
       </div>
     </section>
-    <TodoList class="container"></TodoList>
+    <TodoList></TodoList>
   </div>
 </template>
 
@@ -28,4 +28,7 @@ export default {
 </script>
 
 <style>
+  .mb-0 {
+    margin-bottom: 0 !important;
+  }
 </style>
