@@ -138,7 +138,6 @@ export default {
       // We don't want empty strings
       if (!task.title) {
         task.title = this.beforeEditCache;
-        return;
       }
       task.titleEditing = false;
     },
