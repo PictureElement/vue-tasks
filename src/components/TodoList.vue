@@ -6,20 +6,17 @@
       <div class="modal-content">
         <form>
           <div class="field">
-            <label class="label">Title</label>
             <div class="control">
               <input required class="input" type="text" placeholder="Task title" v-model="newTask.title" v-bind:class="{ 'is-danger': titleError }">
             </div>
             <p v-if="titleError" class="help is-danger">Title required</p>
           </div>
           <div class="field">
-            <label class="label">Description</label>
             <div class="control">
               <textarea class="textarea" placeholder="Task desciption" v-model="newTask.description"></textarea>
             </div>
           </div>
           <div class="field">
-            <label class="label">Date</label>
             <div class="control">
               <input required class="input" type="date" placeholder="Task date" v-model="newTask.date" v-bind:class="{ 'is-danger': dateError }">
             </div>
@@ -33,11 +30,17 @@
       <button class="modal-close is-large" aria-label="close" v-on:click="closeForm"></button>
     </div>
     <!-- TASK LIST -->
-    <div class="taskItem-body container" v-for="(task, index) in tasks" :key="task.id">
-      <input type="checkbox" v-model="tasks[index].completed">
-      <div class="taskItem-titleWrapper" v-bind:class="{ 'completed': tasks[index].completed }">
-        <span class="taskItem-title">{{ task.title }}</span>
-        <span class="taskItem-description">{{ task.description }}</span>
+    <div class="task container" v-for="(task, index) in tasks" :key="task.id">
+      <input class="toggle" type="checkbox" v-model="tasks[index].completed">
+      <div class="task-content">
+        <div class="titleWrapper" v-bind:class="{ 'completed': tasks[index].completed }">
+          <label v-if="!task.titleEditing" @dblclick="editTitle(task)" class="title">{{ task.title }}</label>
+          <input v-else class="edit-title" type="text" v-model="task.title" @blur="doneTitleEdit(task)" @keyup.enter="doneTitleEdit(task)" @keyup.esc="cancelTitleEdit(task)" v-focus>
+        </div>
+        <div class="descriptionWrapper" v-bind:class="{ 'completed': tasks[index].completed }">
+          <label v-if="!task.descriptionEditing" @dblclick="editDescription(task)" class="description">{{ task.description }}</label>
+          <input v-else class="edit-description" type="text" v-model="task.description" @blur="doneDescriptionEdit(task)" @keyup.enter="doneDescriptionEdit(task)" @keyup.esc="cancelDescriptionEdit(task)" v-focus>
+        </div>
       </div>
       <button class="delete is-small" aria-label="delete" v-on:click="deleteTask(index)"></button>
     </div>
@@ -53,14 +56,25 @@ export default {
       formVisible: false,
       newTask:  { title: '', desciption: '', date: '', completed: false },
       tasks: [
-        { title: 'Meeting w. E. You', description: 'Discuss about the future of Vue.js.', date: '2018-09-13', completed: false },
-        { title: 'Book Flight', description: 'Book flight with Etihad Airways to Paris.', date: '2018-09-10', completed: false },
-        { title: 'Haircut', description: '', date: '2018-09-11', completed: false },
-        { title: 'Bike Ride', description: 'Plan the best route', date: '2018-09-12', completed: false },
-        { title: 'Email to M. Zuckerberg', description: '', date: '2018-09-14', completed: false }
+        { title: 'Meeting w. E. You', description: 'Discuss about the future of Vue.js.', date: '2018-09-13', completed: false, titleEditing: false, descriptionEditing: false },
+        { title: 'Book Flight', description: 'Book flight with Etihad Airways to Paris.', date: '2018-09-10', completed: false, titleEditing: false, descriptionEditing: false },
+        { title: 'Haircut', description: '', date: '2018-09-11', completed: false, titleEditing: false, descriptionEditing: false },
+        { title: 'Bike Ride', description: 'Plan the best route.', date: '2018-09-12', completed: false, titleEditing: false, descriptionEditing: false },
+        { title: 'Email to M. Zuckerberg', description: '', date: '2018-09-14', completed: false, titleEditing: false, descriptionEditing: false }
       ],
       titleError: false,
-      dateError: false
+      dateError: false,
+      beforeEditCache: ""
+    }
+  },
+  // Register your own directive (i.e. v-focus). 
+  // All elements that have this directive, gain focus when the page loads.
+  directives: {
+    focus: {
+      inserted: function (el) {
+        // Focus the element
+        el.focus()
+      }
     }
   },
   methods: {
@@ -79,7 +93,7 @@ export default {
           icon: "success",
         });
         this.tasks.push(this.newTask);
-        this.newTask = { title: '', desciption: '', date: '', completed: false };
+        this.newTask = { title: '', desciption: '', date: '', completed: false, titleEditing: false, descriptionEditing: false };
         this.titleError = false;
         this.dateError = false;
         return;
@@ -111,6 +125,29 @@ export default {
           swal("Task is safe!");
         }
       });
+    },
+    editTitle: function(task) {
+      this.beforeEditCache = task.title;
+      task.titleEditing = true;
+    },
+    editDescription: function(task) {
+      this.beforeEditCache = task.desciption;
+      task.descriptionEditing = true;
+    },
+    doneTitleEdit: function(task) {
+      // We don't want empty strings
+      if (!task.title) {
+        task.title = this.beforeEditCache;
+        return;
+      }
+      task.titleEditing = false;
+    },
+    doneDescriptionEdit: function(task) {
+      task.descriptionEditing = false;
+    },
+    cancelTitleEdit: function(task) {
+      task.title = this.beforeEditCache;
+      task.titleEditing = false;
     }
   }
 }
@@ -120,7 +157,7 @@ export default {
   article {
     margin-bottom: 1.5rem;
   }
-  .taskItem-body {
+  .task {
     display: flex;
     align-items: center;
     word-wrap: break-word;
@@ -128,23 +165,28 @@ export default {
     padding: 0 10px;
     border-bottom: 1px solid #e5e5e5;
     min-height: 60px;
+    user-select: none;
   }
-  .taskItem-titleWrapper {
-    display: flex;
-    flex-direction: column;
-    padding: 8px 12px;
+  .toggle {
+    margin-right: 20px;
+    cursor: pointer;
   }
-  .taskItem-title {
+  .task-content {
+    width: 100%;
+  }
+  .title {
     font-size: 1rem;
+    cursor: pointer;
   }
-  .taskItem-description {
-    font-size: 80%;
+  .description {
+    font-size: 0.8rem;
+    cursor: pointer;
   }
   .completed {
     text-decoration: line-through;
   }
   .delete {
-    margin-left: auto;
+    margin-left: 20px;
   }
   .add-task {
     margin-top: 30px;
@@ -155,5 +197,33 @@ export default {
     background: #fff;
     padding: 1rem;
     border-radius: 5px;
+  }
+  .edit-title {
+    font-size: 1rem;
+    font-weight: 600;
+    padding-left: 0;
+    line-height: 1.125;
+    border: none;
+    color: #00d1b2;
+    user-select: none;
+    width: 100%;
+  }
+  .edit-title:focus {
+    outline: none;
+    user-select: none;
+  }
+  .edit-description {
+    font-size: 0.8rem;
+    font-weight: 400;
+    padding-left: 0;
+    line-height: 1.5;
+    border: none;
+    color: #00d1b2;
+    user-select: none;
+    width: 100%;
+  }
+  .edit-description:focus {
+    outline: none;
+    user-select: none;
   }
 </style>
