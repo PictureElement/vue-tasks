@@ -4,33 +4,31 @@
     <div class="modal" v-bind:class="{ 'is-active': formVisible }">
       <div class="modal-background"></div>
       <div class="modal-content">
-        <article class="message">
-          <div class="message-body">
-            <div class="field">
-              <label class="label">Title</label>
-              <div class="control">
-                <input required class="input" type="text" placeholder="Task title" v-model="newTask.title" v-bind:class="{ 'is-danger': titleError }">
-              </div>
-              <p v-if="titleError" class="help is-danger">Title required</p>
+        <form>
+          <div class="field">
+            <label class="label">Title</label>
+            <div class="control">
+              <input required class="input" type="text" placeholder="Task title" v-model="newTask.title" v-bind:class="{ 'is-danger': titleError }">
             </div>
-            <div class="field">
-              <label class="label">Description</label>
-              <div class="control">
-                <textarea class="textarea" placeholder="Task desciption" v-model="newTask.description"></textarea>
-              </div>
-            </div>
-            <div class="field">
-              <label class="label">Date</label>
-              <div class="control">
-                <input required class="input" type="date" placeholder="Task date" v-model="newTask.date" v-bind:class="{ 'is-danger': dateError }">
-              </div>
-              <p v-if="dateError" class="help is-danger">Date required</p>
-            </div>
-            <div class="field">
-              <button class="button is-primary" v-on:click="addTask">Submit</button>
+            <p v-if="titleError" class="help is-danger">Title required</p>
+          </div>
+          <div class="field">
+            <label class="label">Description</label>
+            <div class="control">
+              <textarea class="textarea" placeholder="Task desciption" v-model="newTask.description"></textarea>
             </div>
           </div>
-        </article>
+          <div class="field">
+            <label class="label">Date</label>
+            <div class="control">
+              <input required class="input" type="date" placeholder="Task date" v-model="newTask.date" v-bind:class="{ 'is-danger': dateError }">
+            </div>
+            <p v-if="dateError" class="help is-danger">Date required</p>
+          </div>
+          <div class="field">
+            <button class="button is-primary" v-on:click="addTask">Submit</button>
+          </div>
+        </form>
       </div>
       <button class="modal-close is-large" aria-label="close" v-on:click="closeForm"></button>
     </div>
@@ -73,8 +71,13 @@ export default {
       this.formVisible = false;
     },
     addTask: function(e) {
+      e.preventDefault();
       if (this.newTask.title && this.newTask.date) {
         this.formVisible = false;
+        swal({
+          text: "Task has been added.",
+          icon: "success",
+        });
         this.tasks.push(this.newTask);
         this.newTask = { title: '', desciption: '', date: '', completed: false };
         this.titleError = false;
@@ -89,13 +92,25 @@ export default {
         this.dateError = true;
         this.newTask.date = '';
       }
-      e.preventDefault();
     },
     deleteTask: function(index) {
-      if (confirm("Are you sure you want to delete this event?")) {
-        console.log(index);
-        this.tasks.splice(index, 1);
-      }
+      swal({
+        title: "Delete this task?",
+        text: "This will permanently remove it!",
+        icon: "warning",
+        buttons: true,
+        dangerMode: true,
+      })
+      .then((willDelete) => {
+        if (willDelete) {
+          this.tasks.splice(index, 1);
+          swal("Task has been deleted!", {
+            icon: "success",
+          });
+        } else {
+          swal("Task is safe!");
+        }
+      });
     }
   }
 }
@@ -135,5 +150,10 @@ export default {
     margin-top: 30px;
     display: block;
     margin: 30px auto 0 auto;
+  }
+  form {
+    background: #fff;
+    padding: 1rem;
+    border-radius: 5px;
   }
 </style>
