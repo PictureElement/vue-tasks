@@ -1,18 +1,9 @@
 <template>
-  <div id="app">
-    <section class="mb-0 hero is-primary block">
-      <div class="hero-body">
-        <div class="container">
-          <h1 class="title">
-            Vue Tasks
-          </h1>
-          <h2 class="subtitle">
-            Designed and Developed by PictureElement
-          </h2>
-        </div>
-      </div>
+  <div id="app" class="container">
+    <section class="p-1 has-background-primary">
+      <h1 class="title has-text-centered">Vue Tasks</h1>
     </section>
-    <TodoList></TodoList>
+    <TodoList class="todo-list"></TodoList>
   </div>
 </template>
 
@@ -28,7 +19,18 @@ export default {
 </script>
 
 <style>
-  .mb-0 {
-    margin-bottom: 0 !important;
+  .container {
+    max-width: 640px !important;
+  } 
+  .p-1 {
+    padding: 2rem;
+  }
+  .pb-1 {
+    padding-bottom: 1.5rem;
+  }
+  .todo-list {
+    border: 1px solid rgba(0,0,0,.125);
+    border-top: none;
+    box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, .05);
   }
 </style>

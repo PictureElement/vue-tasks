@@ -29,22 +29,33 @@
       </div>
       <button class="modal-close is-large" aria-label="close" v-on:click="closeForm"></button>
     </div>
+
+    <!-- INPUT AREA -->
+    <div class="inputArea">
+      <div class="group">      
+        <input class="inputArea-input" required type="text" v-model="newTask.title" v-bind:class="{ 'is-danger': titleError }">
+        <span class="highlight"></span>
+        <span class="bar"></span>
+        <label class="inputArea-label">Add a new task</label>
+      </div>
+    </div>
+    
     <!-- TASK LIST -->
-    <div class="task container" v-for="(task, index) in tasks" :key="task.id">
+    <div class="taskList px-1 py-1" v-for="(task, index) in tasks" :key="task.id">
       <input class="toggle" type="checkbox" v-model="tasks[index].completed">
-      <div class="task-content">
-        <div class="titleWrapper" v-bind:class="{ 'completed': tasks[index].completed }">
-          <label v-if="!task.titleEditing" @dblclick="editTitle(task)" class="title">{{ task.title }}</label>
+      <div class="taskList-content">
+        <div v-bind:class="{ 'completed': tasks[index].completed }">
+          <label v-if="!task.titleEditing" @click="editTitle(task)" class="view-title">{{ task.title }}</label>
           <input v-else class="edit-title" type="text" v-model="task.title" @blur="doneTitleEdit(task)" @keyup.enter="doneTitleEdit(task)" @keyup.esc="cancelTitleEdit(task)" v-focus>
         </div>
-        <div class="descriptionWrapper" v-bind:class="{ 'completed': tasks[index].completed }">
-          <label v-if="!task.descriptionEditing" @dblclick="editDescription(task)" class="description">{{ task.description }}</label>
+        <div v-bind:class="{ 'completed': tasks[index].completed }">
+          <label v-if="!task.descriptionEditing" @click="editDescription(task)" class="view-description">{{ task.description }}</label>
           <input v-else class="edit-description" type="text" v-model="task.description" @blur="doneDescriptionEdit(task)" @keyup.enter="doneDescriptionEdit(task)" @keyup.esc="cancelDescriptionEdit(task)" v-focus>
         </div>
       </div>
       <button class="delete is-small" aria-label="delete" v-on:click="deleteTask(index)"></button>
     </div>
-    <button class="add-task button is-primary is-rounded" v-on:click="openForm">+ Add a task</button>
+    <!--<button class="add-task button is-primary is-rounded" v-on:click="openForm">+ Add a task</button>-->
   </div>
 </template>
 
@@ -88,10 +99,6 @@ export default {
       e.preventDefault();
       if (this.newTask.title && this.newTask.date) {
         this.formVisible = false;
-        swal({
-          text: "Task has been added.",
-          icon: "success",
-        });
         this.tasks.push(this.newTask);
         this.newTask = { title: '', desciption: '', date: '', completed: false, titleEditing: false, descriptionEditing: false };
         this.titleError = false;
@@ -153,76 +160,194 @@ export default {
 </script>
 
 <style scoped>
-  article {
-    margin-bottom: 1.5rem;
-  }
-  .task {
+  .taskList {
     display: flex;
     align-items: center;
     word-wrap: break-word;
     word-break: break-word;
-    padding: 0 10px;
-    border-bottom: 1px solid #e5e5e5;
+    border-bottom: 1px solid rgba(0,0,0,.125);
     min-height: 60px;
-    user-select: none;
   }
+
   .toggle {
-    margin-right: 20px;
+    margin-right: 1.5rem;
     cursor: pointer;
   }
-  .task-content {
+
+  .taskList-content {
     width: 100%;
   }
-  .title {
+
+  .view-title {
     font-size: 1rem;
+    font-weight: 600;
     cursor: pointer;
+    width: 100%;
   }
-  .description {
+
+  .view-description {
+    font-size: .8rem;
+    font-weight: 400;
+    cursor: pointer;
+    width: 100%;
+  }
+
+  .edit-title {
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 1;
+    border: none;
+    color: #00d1b2;
+    width: 100%;
+  }
+
+  .edit-title:focus {
+    outline: none;
+  }
+
+  .edit-description {
     font-size: 0.8rem;
-    cursor: pointer;
+    font-weight: 400;
+    line-height: 1;
+    border: none;
+    color: #00d1b2;
+    width: 100%;
   }
+
+  .edit-description:focus {
+    outline: none;
+  }
+
   .completed {
     text-decoration: line-through;
   }
+
   .delete {
-    margin-left: 20px;
+    margin-left: 1.5rem;
   }
+
+  /*
   .add-task {
     margin-top: 30px;
     display: block;
     margin: 30px auto 0 auto;
   }
+
   form {
     background: #fff;
     padding: 1rem;
     border-radius: 5px;
   }
-  .edit-title {
-    font-size: 1rem;
-    font-weight: 600;
-    padding-left: 0;
-    line-height: 1.125;
-    border: none;
-    color: #00d1b2;
-    user-select: none;
-    width: 100%;
+  */
+
+  .px-1 {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
   }
-  .edit-title:focus {
-    outline: none;
-    user-select: none;
+  
+  .py-1 {
+    padding-top: .75rem;
+    padding-bottom: .75rem;
   }
-  .edit-description {
-    font-size: 0.8rem;
-    font-weight: 400;
-    padding-left: 0;
-    line-height: 1.5;
-    border: none;
-    color: #00d1b2;
-    user-select: none;
-    width: 100%;
+
+  /* Google Material Design Inputs */
+  .group { 
+    position:relative; 
+    margin-bottom:0;
   }
-  .edit-description:focus {
-    outline: none;
-    user-select: none;
+
+  .inputArea {
+    padding: 3rem 1.5rem;
+  }
+
+  .inputArea-input {
+    font-size:1rem;
+    padding:10px 10px 10px 5px;
+    display:block;
+    width:100%;
+    border:none;
+    border-bottom:1px solid rgba(0,0,0,.125);
+  }
+
+  .inputArea-input:focus { 
+    outline:none; 
+  }
+
+  .inputArea-label {
+    color:#999; 
+    font-size:1rem;
+    font-weight:normal;
+    position:absolute;
+    pointer-events:none;
+    left:5px;
+    top:10px;
+    transition:0.2s ease all; 
+    -moz-transition:0.2s ease all; 
+    -webkit-transition:0.2s ease all;
+  }
+
+  .inputArea-input:focus ~ label, .inputArea-input:valid ~ label {
+    top:-20px;
+    font-size:14px;
+    color:#00d1b2;
+  }
+
+  .bar { 
+    position:relative; 
+    display:block; 
+    width:100%;
+  }
+
+  .bar:before, .bar:after {
+    content:'';
+    height:2px; 
+    width:0;
+    bottom:1px; 
+    position:absolute;
+    background:#00d1b2;
+    transition:0.2s ease all; 
+    -moz-transition:0.2s ease all; 
+    -webkit-transition:0.2s ease all;
+  }
+
+  .bar:before {
+    left:50%;
+  }
+
+  .bar:after {
+    right:50%; 
+  }
+
+  .inputArea-input:focus ~ .bar:before, .inputArea-input:focus ~ .bar:after {
+    width:50%;
+  }
+
+  .highlight {
+    position:absolute;
+    height:60%; 
+    width:100px; 
+    top:25%; 
+    left:0;
+    pointer-events:none;
+    opacity:0.5;
+  }
+
+  .inputArea-input:focus ~ .highlight {
+    -webkit-animation:inputHighlighter 0.3s ease;
+    -moz-animation:inputHighlighter 0.3s ease;
+    animation:inputHighlighter 0.3s ease;
+  }
+
+  @-webkit-keyframes inputHighlighter {
+    from { background:#5264AE; }
+    to 	{ width:0; background:transparent; }
+  }
+  @-moz-keyframes inputHighlighter {
+    from { background:#5264AE; }
+    to 	{ width:0; background:transparent; }
+  }
+  @keyframes inputHighlighter {
+    from { background:#5264AE; }
+    to 	{ width:0; background:transparent; }
   }
 </style>
