@@ -1,6 +1,6 @@
 <template>
   <div>
-    <!-- FORM -->
+    <!-- FORM
     <div class="modal" v-bind:class="{ 'is-active': formVisible }">
       <div class="modal-background"></div>
       <div class="modal-content">
@@ -29,11 +29,12 @@
       </div>
       <button class="modal-close is-large" aria-label="close" v-on:click="closeForm"></button>
     </div>
+    -->
 
     <!-- INPUT AREA -->
     <div class="inputArea">
       <div class="group">      
-        <input class="inputArea-input" required type="text" v-model="newTask.title" v-bind:class="{ 'is-danger': titleError }">
+        <input class="inputArea-input" required type="text" v-model="newTask.title" @keyup.enter="addTask">
         <span class="highlight"></span>
         <span class="bar"></span>
         <label class="inputArea-label">Add a new task</label>
@@ -65,7 +66,7 @@ export default {
   data() {
     return {
       formVisible: false,
-      newTask:  { title: '', desciption: '', date: '', completed: false },
+      newTask:  { title: '', desciption: '', date: '', completed: false, titleEditing: false, descriptionEditing: false },
       tasks: [
         { title: 'Meeting w. E. You', description: 'Discuss about the future of Vue.js.', date: '2018-09-13', completed: false, titleEditing: false, descriptionEditing: false },
         { title: 'Book Flight', description: 'Book flight with Etihad Airways to Paris.', date: '2018-09-10', completed: false, titleEditing: false, descriptionEditing: false },
@@ -95,6 +96,13 @@ export default {
     closeForm: function() {
       this.formVisible = false;
     },
+    addTask: function() {
+      if (this.newTask.title) {
+        this.tasks.push(this.newTask);
+        this.newTask = { title: '', desciption: '', date: '', completed: false, titleEditing: false, descriptionEditing: false };
+      }
+    },
+    /*
     addTask: function(e) {
       e.preventDefault();
       if (this.newTask.title && this.newTask.date) {
@@ -114,6 +122,7 @@ export default {
         this.newTask.date = '';
       }
     },
+    */
     deleteTask: function(index) {
       swal({
         title: "Delete this task?",
