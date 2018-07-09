@@ -1,36 +1,6 @@
 <template>
   <div>
-    <!-- FORM
-    <div class="modal" v-bind:class="{ 'is-active': formVisible }">
-      <div class="modal-background"></div>
-      <div class="modal-content">
-        <form>
-          <div class="field">
-            <div class="control">
-              <input required class="input" type="text" placeholder="Task title" v-model="newTask.title" v-bind:class="{ 'is-danger': titleError }">
-            </div>
-            <p v-if="titleError" class="help is-danger">Title required</p>
-          </div>
-          <div class="field">
-            <div class="control">
-              <textarea class="textarea" placeholder="Task desciption" v-model="newTask.description"></textarea>
-            </div>
-          </div>
-          <div class="field">
-            <div class="control">
-              <input required class="input" type="date" placeholder="Task date" v-model="newTask.date" v-bind:class="{ 'is-danger': dateError }">
-            </div>
-            <p v-if="dateError" class="help is-danger">Date required</p>
-          </div>
-          <div class="field">
-            <button class="button is-primary" v-on:click="addTask">Submit</button>
-          </div>
-        </form>
-      </div>
-      <button class="modal-close is-large" aria-label="close" v-on:click="closeForm"></button>
-    </div>
-    -->
-
+    
     <!-- INPUT AREA -->
     <div class="inputArea">
       <div class="group">      
@@ -43,20 +13,50 @@
     
     <!-- TASK LIST -->
     <div class="taskList px-1 py-1" v-for="(task, index) in tasks" :key="task.id">
-      <input class="toggle" type="checkbox" v-model="tasks[index].completed">
+      <input class="toggle" type="checkbox" v-model="task.completed">
       <div class="taskList-content">
-        <div v-bind:class="{ 'completed': tasks[index].completed }">
+        <div v-bind:class="{ 'completed': task.completed }">
           <label v-if="!task.titleEditing" @click="editTitle(task)" class="view-title">{{ task.title }}</label>
           <input v-else class="edit-title" type="text" v-model="task.title" @blur="doneTitleEdit(task)" @keyup.enter="doneTitleEdit(task)" @keyup.esc="cancelTitleEdit(task)" v-focus>
         </div>
-        <div v-bind:class="{ 'completed': tasks[index].completed }">
+        <div v-bind:class="{ 'completed': task.completed }">
           <label v-if="!task.descriptionEditing" @click="editDescription(task)" class="view-description">{{ task.description }}</label>
           <input v-else class="edit-description" type="text" v-model="task.description" @blur="doneDescriptionEdit(task)" @keyup.enter="doneDescriptionEdit(task)" @keyup.esc="cancelDescriptionEdit(task)" v-focus>
         </div>
       </div>
-      <button class="delete is-small" aria-label="delete" v-on:click="deleteTask(index)"></button>
+      <!-- EDIT FORM -->
+      <div class="modal" v-bind:class="{ 'is-active': task.taskEditing }">
+        <div class="modal-background"></div>
+        <div class="modal-content">
+          <div class="edit-task">
+            <div class="field">
+              <div class="control">
+                <input class="input" type="text" placeholder="Title" v-model="task.title">
+              </div>
+              <p v-if="titleError" class="help is-danger">Title required</p>
+            </div>
+            <div class="field">
+              <div class="control">
+                <textarea class="textarea" placeholder="Description" v-model="task.description"></textarea>
+              </div>
+            </div>
+            <div class="field">
+              <div class="control">
+                <input required class="input" type="date" placeholder="Date" v-model="task.date">
+              </div>
+              <p v-if="dateError" class="help is-danger">Date required</p>
+            </div>
+            <div class="field">
+              <button class="button is-primary" @click="doneTaskEdit(task)">Submit</button>
+            </div>
+          </div>
+        </div>
+        <button class="modal-close is-large" aria-label="close" @click="cancelTaskEdit(task)"></button>
+      </div>
+      <font-awesome-icon icon="edit" type="button" aria-label="edit" class="edit-icon" @click="editTask(task)" />
+      <font-awesome-icon icon="times" type="button" aria-label="delete" class="delete-icon" @click="deleteTask(index)" />
     </div>
-    <!--<button class="add-task button is-primary is-rounded" v-on:click="openForm">+ Add a task</button>-->
+
   </div>
 </template>
 
@@ -68,15 +68,17 @@ export default {
       formVisible: false,
       newTask:  { title: '', desciption: '', date: '', completed: false, titleEditing: false, descriptionEditing: false },
       tasks: [
-        { title: 'Meeting w. E. You', description: 'Discuss about the future of Vue.js.', date: '2018-09-13', completed: false, titleEditing: false, descriptionEditing: false },
-        { title: 'Book Flight', description: 'Book flight with Etihad Airways to Paris.', date: '2018-09-10', completed: false, titleEditing: false, descriptionEditing: false },
-        { title: 'Haircut', description: '', date: '2018-09-11', completed: false, titleEditing: false, descriptionEditing: false },
-        { title: 'Bike Ride', description: 'Plan the best route.', date: '2018-09-12', completed: false, titleEditing: false, descriptionEditing: false },
-        { title: 'Email to M. Zuckerberg', description: '', date: '2018-09-14', completed: false, titleEditing: false, descriptionEditing: false }
+        { title: 'Meeting w. E. You', description: 'Discuss about the future of Vue.js.', date: '2018-09-13', completed: false, titleEditing: false, descriptionEditing: false, taskEditing: false },
+        { title: 'Book Flight', description: 'Book flight with Etihad Airways to Paris.', date: '2018-09-10', completed: false, titleEditing: false, descriptionEditing: false, taskEditing: false },
+        { title: 'Haircut', description: '', date: '2018-09-11', completed: false, titleEditing: false, descriptionEditing: false, taskEditing: false },
+        { title: 'Bike Ride', description: 'Plan the best route.', date: '2018-09-12', completed: false, titleEditing: false, descriptionEditing: false, taskEditing: false },
+        { title: 'Email to M. Zuckerberg', description: '', date: '2018-09-14', completed: false, titleEditing: false, descriptionEditing: false, taskEditing: false }
       ],
       titleError: false,
       dateError: false,
-      beforeEditCache: ""
+      beforeEditTitle: "",
+      beforeEditDescription: "",
+      beforeEditDate: ""
     }
   },
   // Register your own directive (i.e. v-focus). 
@@ -90,39 +92,12 @@ export default {
     }
   },
   methods: {
-    openForm: function() {
-      this.formVisible = true;
-    },
-    closeForm: function() {
-      this.formVisible = false;
-    },
     addTask: function() {
       if (this.newTask.title) {
         this.tasks.push(this.newTask);
         this.newTask = { title: '', desciption: '', date: '', completed: false, titleEditing: false, descriptionEditing: false };
       }
     },
-    /*
-    addTask: function(e) {
-      e.preventDefault();
-      if (this.newTask.title && this.newTask.date) {
-        this.formVisible = false;
-        this.tasks.push(this.newTask);
-        this.newTask = { title: '', desciption: '', date: '', completed: false, titleEditing: false, descriptionEditing: false };
-        this.titleError = false;
-        this.dateError = false;
-        return;
-      }
-      if (!this.newTask.title) {
-        this.titleError = true;
-        this.newTask.title = '';
-      }
-      if (!this.newTask.date) {
-        this.dateError = true;
-        this.newTask.date = '';
-      }
-    },
-    */
     deleteTask: function(index) {
       swal({
         title: "Delete this task?",
@@ -143,32 +118,80 @@ export default {
       });
     },
     editTitle: function(task) {
-      this.beforeEditCache = task.title;
+      this.beforeEditTitle = task.title;
       task.titleEditing = true;
     },
     editDescription: function(task) {
-      this.beforeEditCache = task.desciption;
+      this.beforeEditDescription = task.description;
       task.descriptionEditing = true;
     },
+    editTask: function(task) {
+      this.beforeEditTitle = task.title;
+      this.beforeEditDescription = task.description;
+      this.beforeEditDate = task.date;
+      task.taskEditing = true;
+    },
     doneTitleEdit: function(task) {
-      // We don't want empty strings
+      // We don't want empty title strings
       if (!task.title) {
-        task.title = this.beforeEditCache;
+        task.title = this.beforeEditTitle;
       }
       task.titleEditing = false;
     },
     doneDescriptionEdit: function(task) {
       task.descriptionEditing = false;
     },
+    doneTaskEdit: function(task) {
+      // We dont' want empty title and date strings
+      if (task.title && task.date) {
+        this.titleError = false;
+        this.dateError = false;
+        task.taskEditing = false;
+        return;
+      }
+      else if (!task.title && !task.date) {
+        this.titleError = true;
+        this.newTask.title = '';
+        this.dateError = true;
+        this.newTask.date = '';
+        return;
+      }
+      else if (!task.title) {
+        this.titleError = true;
+        this.newTask.title = '';
+        return;
+      }
+      else {
+        this.dateError = true;
+        this.newTask.date = '';
+        return;
+      }
+    },
     cancelTitleEdit: function(task) {
-      task.title = this.beforeEditCache;
+      task.title = this.beforeEditTitle;
       task.titleEditing = false;
+    },
+    cancelDescriptionEdit: function(task) {
+      task.description = this.beforeEditDescription;
+      task.descriptionEditing = false;
+    },
+    cancelTaskEdit: function(task) {
+      task.title = this.beforeEditTitle;
+      task.description = this.beforeEditDescription;
+      task.date = this.beforeEditDate;
+      task.taskEditing = false;
     }
   }
 }
 </script>
 
 <style scoped>
+
+  .delete-icon, .edit-icon {
+    cursor: pointer;
+    margin-left: 1.5rem;
+  }
+
   .taskList {
     display: flex;
     align-items: center;
@@ -235,20 +258,12 @@ export default {
     margin-left: 1.5rem;
   }
 
-  /*
-  .add-task {
-    margin-top: 30px;
-    display: block;
-    margin: 30px auto 0 auto;
-  }
-
-  form {
+  .edit-task {
     background: #fff;
     padding: 1rem;
     border-radius: 5px;
   }
-  */
-
+  
   .px-1 {
     padding-left: 1.5rem;
     padding-right: 1.5rem;
