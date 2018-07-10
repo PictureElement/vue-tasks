@@ -31,7 +31,7 @@
           <div class="edit-task">
             <div class="field">
               <div class="control">
-                <input class="input" type="text" placeholder="Title" v-model="task.title">
+                <input required class="input" type="text" placeholder="Title" v-model="task.title">
               </div>
               <p v-if="titleError" class="help is-danger">Title required</p>
             </div>
@@ -42,9 +42,8 @@
             </div>
             <div class="field">
               <div class="control">
-                <input required class="input" type="date" placeholder="Date" v-model="task.date">
+                <input class="input" type="date" placeholder="Date" v-model="task.date">
               </div>
-              <p v-if="dateError" class="help is-danger">Date required</p>
             </div>
             <div class="field">
               <button class="button is-primary" @click="doneTaskEdit(task)">Submit</button>
@@ -66,7 +65,9 @@ export default {
   data() {
     return {
       formVisible: false,
-      newTask:  { title: '', desciption: '', date: '', completed: false, titleEditing: false, descriptionEditing: false },
+      newTask:  { title: '', desciption: '', date: '', completed: false, titleEditing: false, descriptionEditing: false, taskEditing: false },
+      tasks: [],
+      /*
       tasks: [
         { title: 'Meeting w. E. You', description: 'Discuss about the future of Vue.js.', date: '2018-09-13', completed: false, titleEditing: false, descriptionEditing: false, taskEditing: false },
         { title: 'Book Flight', description: 'Book flight with Etihad Airways to Paris.', date: '2018-09-10', completed: false, titleEditing: false, descriptionEditing: false, taskEditing: false },
@@ -74,8 +75,8 @@ export default {
         { title: 'Bike Ride', description: 'Plan the best route.', date: '2018-09-12', completed: false, titleEditing: false, descriptionEditing: false, taskEditing: false },
         { title: 'Email to M. Zuckerberg', description: '', date: '2018-09-14', completed: false, titleEditing: false, descriptionEditing: false, taskEditing: false }
       ],
+      */
       titleError: false,
-      dateError: false,
       beforeEditTitle: "",
       beforeEditDescription: "",
       beforeEditDate: ""
@@ -95,7 +96,7 @@ export default {
     addTask: function() {
       if (this.newTask.title) {
         this.tasks.push(this.newTask);
-        this.newTask = { title: '', desciption: '', date: '', completed: false, titleEditing: false, descriptionEditing: false };
+        this.newTask = { title: '', desciption: '', date: '', completed: false, titleEditing: false, descriptionEditing: false, taskEditing: false };
       }
     },
     deleteTask: function(index) {
@@ -142,28 +143,15 @@ export default {
       task.descriptionEditing = false;
     },
     doneTaskEdit: function(task) {
-      // We dont' want empty title and date strings
-      if (task.title && task.date) {
+      // We dont' want an empty title string
+      if (task.title) {
         this.titleError = false;
-        this.dateError = false;
         task.taskEditing = false;
         return;
       }
-      else if (!task.title && !task.date) {
-        this.titleError = true;
-        this.newTask.title = '';
-        this.dateError = true;
-        this.newTask.date = '';
-        return;
-      }
-      else if (!task.title) {
-        this.titleError = true;
-        this.newTask.title = '';
-        return;
-      }
       else {
-        this.dateError = true;
-        this.newTask.date = '';
+        this.titleError = true;
+        this.newTask.title = '';
         return;
       }
     },
