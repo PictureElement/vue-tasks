@@ -1,6 +1,6 @@
 <template>
-  <div>
-    
+  <section>
+
     <!-- INPUT AREA -->
     <div class="inputArea">
       <div class="group">      
@@ -12,15 +12,15 @@
     </div>
     
     <!-- TASK LIST -->
-    <div class="taskList px-1 py-1" v-for="(task, index) in tasks" :key="task.id">
+    <div class="taskList px-1 py-1" v-for="(task, index) in filteredTasks" :key="task.id">
       <input class="toggle" type="checkbox" v-model="task.completed">
       <div class="taskList-content">
         <div v-bind:class="{ 'completed': task.completed }">
-          <label v-if="!task.titleEditing" @click="editTitle(task)" class="view-title">{{ task.title }}</label>
+          <label v-if="!task.titleEditing" @dblclick="editTitle(task)" class="view-title">{{ task.title }}</label>
           <input v-else class="edit-title" type="text" v-model="task.title" @blur="doneTitleEdit(task)" @keyup.enter="doneTitleEdit(task)" @keyup.esc="cancelTitleEdit(task)" v-focus>
         </div>
         <div v-bind:class="{ 'completed': task.completed }">
-          <label v-if="!task.descriptionEditing" @click="editDescription(task)" class="view-description">{{ task.description }}</label>
+          <label v-if="!task.descriptionEditing" @dblclick="editDescription(task)" class="view-description">{{ task.description }}</label>
           <input v-else class="edit-description" type="text" v-model="task.description" @blur="doneDescriptionEdit(task)" @keyup.enter="doneDescriptionEdit(task)" @keyup.esc="cancelDescriptionEdit(task)" v-focus>
         </div>
       </div>
@@ -46,17 +46,35 @@
               </div>
             </div>
             <div class="field">
-              <button class="button is-primary" @click="doneTaskEdit(task)">Submit</button>
+              <button class="button is-primary" @dblclick="doneTaskEdit(task)">Submit</button>
             </div>
           </div>
         </div>
-        <button class="modal-close is-large" aria-label="close" @click="cancelTaskEdit(task)"></button>
+        <button class="modal-close is-large" aria-label="close" @dblclick="cancelTaskEdit(task)"></button>
       </div>
-      <font-awesome-icon icon="edit" type="button" aria-label="edit" class="edit-icon" @click="editTask(task)" />
-      <font-awesome-icon icon="times" type="button" aria-label="delete" class="delete-icon" @click="deleteTask(index)" />
+      <font-awesome-icon icon="edit" type="button" aria-label="edit" class="edit-icon" @dblclick="editTask(task)" />
+      <font-awesome-icon icon="times" type="button" aria-label="delete" class="delete-icon" @dblclick="deleteTask(index)" />
     </div>
 
-  </div>
+    <footer class="px-1 py-1">
+      <div class="remaining">
+        <span>{{ remaining }} tasks left</span>
+      </div>
+      <div class="level is-mobile filters">
+        <div class="level-left">
+          <div class="buttons has-addons">
+            <span class="button is-small" v-bind:class="{ 'is-active': filter == 'all' }" @click="filter = 'all'">All</span>
+            <span class="button is-small" v-bind:class="{ 'is-active': filter == 'active' }" @click="filter = 'active'">Active</span>
+            <span class="button is-small" v-bind:class="{ 'is-active': filter == 'completed' }" @click="filter = 'completed'">Completed</span>
+          </div>
+        </div>
+        <div class="level-right">
+          <button class="clear-btn button is-small is-danger">Clear</button>
+        </div>
+      </div>
+    </footer>
+
+  </section>
 </template>
 
 <script>
@@ -79,7 +97,33 @@ export default {
       titleError: false,
       beforeEditTitle: "",
       beforeEditDescription: "",
-      beforeEditDate: ""
+      beforeEditDate: "",
+      filter: "all"
+    }
+  },
+  computed: {
+    /*
+    // ES5
+    remaining: function() {
+      return this.tasks.filter(function (task) {
+        return !task.completed;
+      }).length;
+    },
+    */
+    // ES6 - Arrow functions
+    remaining: function() {
+      return this.tasks.filter(task => { return !task.completed }).length;
+    },
+    filteredTasks: function() {
+      if (this.filter === 'all') {
+        return this.tasks;
+      }
+      else if (this.filter === 'active') {
+        return this.tasks.filter(task => { return !task.completed});
+      }
+      else {
+        return this.tasks.filter(task => { return task.completed});
+      }
     }
   },
   // Register your own directive (i.e. v-focus). 
@@ -175,6 +219,15 @@ export default {
 
 <style scoped>
 
+  .filters {
+    margin-bottom: 0 !important;
+  }
+
+  .remaining {
+    font-size: 0.75rem;
+    margin-bottom: 0.75rem;
+  }
+
   .delete-icon, .edit-icon {
     cursor: pointer;
     margin-left: 1.5rem;
@@ -226,7 +279,7 @@ export default {
   }
 
   .edit-description {
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     font-weight: 400;
     line-height: 1;
     border: none;
