@@ -46,14 +46,14 @@
               </div>
             </div>
             <div class="field">
-              <button class="button is-primary" @dblclick="doneTaskEdit(task)">Submit</button>
+              <button class="button is-primary" @click="doneTaskEdit(task)">Submit</button>
             </div>
           </div>
         </div>
-        <button class="modal-close is-large" aria-label="close" @dblclick="cancelTaskEdit(task)"></button>
+        <button class="modal-close is-large" aria-label="close" @click="cancelTaskEdit(task)"></button>
       </div>
-      <font-awesome-icon icon="edit" type="button" aria-label="edit" class="edit-icon" @dblclick="editTask(task)" />
-      <font-awesome-icon icon="times" type="button" aria-label="delete" class="delete-icon" @dblclick="deleteTask(index)" />
+      <font-awesome-icon icon="edit" type="button" aria-label="edit" class="edit-icon" @click="editTask(task)" />
+      <font-awesome-icon icon="times" type="button" aria-label="delete" class="delete-icon" @click="deleteTask(index)" />
     </div>
 
     <footer class="px-1 py-1">
