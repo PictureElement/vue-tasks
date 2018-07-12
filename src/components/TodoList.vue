@@ -12,49 +12,51 @@
     </div>
     
     <!-- TASK LIST -->
-    <div class="taskList px-1 py-1" v-for="(task, index) in filteredTasks" :key="task.id">
-      <input class="toggle" type="checkbox" v-model="task.completed">
-      <div class="taskList-content">
-        <div v-bind:class="{ 'completed': task.completed }">
-          <label v-if="!task.titleEditing" @dblclick="editTitle(task)" class="view-title">{{ task.title }}</label>
-          <input v-else class="edit-title" type="text" v-model="task.title" @blur="doneTitleEdit(task)" @keyup.enter="doneTitleEdit(task)" @keyup.esc="cancelTitleEdit(task)" v-focus>
-        </div>
-        <div v-bind:class="{ 'completed': task.completed }">
-          <label v-if="!task.descriptionEditing" @dblclick="editDescription(task)" class="view-description">{{ task.description }}</label>
-          <input v-else class="edit-description" type="text" v-model="task.description" @blur="doneDescriptionEdit(task)" @keyup.enter="doneDescriptionEdit(task)" @keyup.esc="cancelDescriptionEdit(task)" v-focus>
-        </div>
-      </div>
-      <!-- EDIT FORM -->
-      <div class="modal" v-bind:class="{ 'is-active': task.taskEditing }">
-        <div class="modal-background"></div>
-        <div class="modal-content">
-          <div class="edit-task">
-            <div class="field">
-              <div class="control">
-                <input required class="input" type="text" placeholder="Title" v-model="task.title">
-              </div>
-              <p v-if="titleError" class="help is-danger">Title required</p>
-            </div>
-            <div class="field">
-              <div class="control">
-                <textarea class="textarea" placeholder="Description" v-model="task.description"></textarea>
-              </div>
-            </div>
-            <div class="field">
-              <div class="control">
-                <input class="input" type="date" placeholder="Date" v-model="task.date">
-              </div>
-            </div>
-            <div class="field">
-              <button class="button is-primary" @click="doneTaskEdit(task)">Submit</button>
-            </div>
+    <transition-group enter-active-class="animated fadeInUp" leave-active-class="animated fadeOutDown">
+      <div class="taskList px-1 py-1" v-for="(task, index) in filteredTasks" :key="index">
+        <input class="toggle" type="checkbox" v-model="task.completed">
+        <div class="taskList-content">
+          <div v-bind:class="{ 'completed': task.completed }">
+            <label v-if="!task.titleEditing" @dblclick="editTitle(task)" class="view-title">{{ task.title }}</label>
+            <input v-else class="edit-title" type="text" v-model="task.title" @blur="doneTitleEdit(task)" @keyup.enter="doneTitleEdit(task)" @keyup.esc="cancelTitleEdit(task)" v-focus>
+          </div>
+          <div v-bind:class="{ 'completed': task.completed }">
+            <label v-if="!task.descriptionEditing" @dblclick="editDescription(task)" class="view-description">{{ task.description }}</label>
+            <input v-else class="edit-description" type="text" v-model="task.description" @blur="doneDescriptionEdit(task)" @keyup.enter="doneDescriptionEdit(task)" @keyup.esc="cancelDescriptionEdit(task)" v-focus>
           </div>
         </div>
-        <button class="modal-close is-large" aria-label="close" @click="cancelTaskEdit(task)"></button>
+        <!-- EDIT FORM -->
+        <div class="modal" v-bind:class="{ 'is-active': task.taskEditing }">
+          <div class="modal-background"></div>
+          <div class="modal-content">
+            <div class="edit-task">
+              <div class="field">
+                <div class="control">
+                  <input required class="input" type="text" placeholder="Title" v-model="task.title">
+                </div>
+                <p v-if="titleError" class="help is-danger">Title required</p>
+              </div>
+              <div class="field">
+                <div class="control">
+                  <textarea class="textarea" placeholder="Description" v-model="task.description"></textarea>
+                </div>
+              </div>
+              <div class="field">
+                <div class="control">
+                  <input class="input" type="date" placeholder="Date" v-model="task.date">
+                </div>
+              </div>
+              <div class="field">
+                <button class="button is-primary" @click="doneTaskEdit(task)">Submit</button>
+              </div>
+            </div>
+          </div>
+          <button class="modal-close is-large" aria-label="close" @click="cancelTaskEdit(task)"></button>
+        </div>
+        <font-awesome-icon icon="edit" type="button" aria-label="edit" class="edit-icon" @click="editTask(task)" />
+        <font-awesome-icon icon="times" type="button" aria-label="delete" class="delete-icon" @click="deleteTask(index)" />
       </div>
-      <font-awesome-icon icon="edit" type="button" aria-label="edit" class="edit-icon" @click="editTask(task)" />
-      <font-awesome-icon icon="times" type="button" aria-label="delete" class="delete-icon" @click="deleteTask(index)" />
-    </div>
+    </transition-group>
 
     <footer class="px-1 py-1">
       <div class="remaining">
@@ -69,7 +71,9 @@
           </div>
         </div>
         <div class="level-right">
-          <button v-if="showClearBtn" @click="clearCompleted" class="clear-btn button is-small is-danger">Clear</button>
+          <transition name="fade">
+            <button v-if="showClearBtn" @click="clearCompleted" class="clear-btn button is-small is-danger">Clear</button>
+          </transition>
         </div>
       </div>
     </footer>
@@ -225,6 +229,16 @@ export default {
 
 <style scoped>
 
+  @import url('https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css');
+
+  .fade-enter-active, .fade-leave-active {
+    transition: opacity .5s;
+  }
+
+  .fade-enter, .fade-leave-to /* .fade-leave-active below version 2.1.8 */ {
+    opacity: 0;
+  }
+
   .filters {
     margin-bottom: 0 !important;
   }
@@ -246,6 +260,7 @@ export default {
     word-break: break-word;
     border-bottom: 1px solid rgba(0,0,0,.125);
     min-height: 60px;
+    animation-duration: 0.2s; /* Animation duration for fadeInUp and fadeOutDown */
   }
 
   .toggle {
