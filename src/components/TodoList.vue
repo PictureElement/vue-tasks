@@ -69,7 +69,7 @@
           </div>
         </div>
         <div class="level-right">
-          <button class="clear-btn button is-small is-danger">Clear</button>
+          <button v-if="showClearBtn" @click="clearCompleted" class="clear-btn button is-small is-danger">Clear</button>
         </div>
       </div>
     </footer>
@@ -124,6 +124,9 @@ export default {
       else {
         return this.tasks.filter(task => { return task.completed});
       }
+    },
+    showClearBtn: function() {
+      return this.tasks.filter(task => { return task.completed }).length > 0
     }
   },
   // Register your own directive (i.e. v-focus). 
@@ -212,6 +215,9 @@ export default {
       task.description = this.beforeEditDescription;
       task.date = this.beforeEditDate;
       task.taskEditing = false;
+    },
+    clearCompleted: function() {
+      this.tasks = this.tasks.filter(task => { return !task.completed });
     }
   }
 }
