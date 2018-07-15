@@ -13,49 +13,7 @@
     
     <!-- TASK LIST -->
     <transition-group enter-active-class="animated fadeInUp" leave-active-class="animated fadeOutDown">
-      <div class="taskList px-1 py-1" v-for="(task, index) in filteredTasks" :key="index">
-        <input class="toggle" type="checkbox" v-model="task.completed">
-        <div class="taskList-content">
-          <div v-bind:class="{ 'completed': task.completed }">
-            <label v-if="!task.titleEditing" @dblclick="editTitle(task)" class="view-title">{{ task.title }}</label>
-            <input v-else class="edit-title" type="text" v-model="task.title" @blur="doneTitleEdit(task)" @keyup.enter="doneTitleEdit(task)" @keyup.esc="cancelTitleEdit(task)" v-focus>
-          </div>
-          <div v-bind:class="{ 'completed': task.completed }">
-            <label v-if="!task.descriptionEditing" @dblclick="editDescription(task)" class="view-description">{{ task.description }}</label>
-            <input v-else class="edit-description" type="text" v-model="task.description" @blur="doneDescriptionEdit(task)" @keyup.enter="doneDescriptionEdit(task)" @keyup.esc="cancelDescriptionEdit(task)" v-focus>
-          </div>
-        </div>
-        <!-- EDIT FORM -->
-        <div class="modal" v-bind:class="{ 'is-active': task.taskEditing }">
-          <div class="modal-background"></div>
-          <div class="modal-content">
-            <div class="edit-task">
-              <div class="field">
-                <div class="control">
-                  <input required class="input" type="text" placeholder="Title" v-model="task.title">
-                </div>
-                <p v-if="titleError" class="help is-danger">Title required</p>
-              </div>
-              <div class="field">
-                <div class="control">
-                  <textarea class="textarea" placeholder="Description" v-model="task.description"></textarea>
-                </div>
-              </div>
-              <div class="field">
-                <div class="control">
-                  <input class="input" type="date" placeholder="Date" v-model="task.date">
-                </div>
-              </div>
-              <div class="field">
-                <button class="button is-primary" @click="doneTaskEdit(task)">Submit</button>
-              </div>
-            </div>
-          </div>
-          <button class="modal-close is-large" aria-label="close" @click="cancelTaskEdit(task)"></button>
-        </div>
-        <font-awesome-icon icon="edit" type="button" aria-label="edit" class="edit-icon" @click="editTask(task)" />
-        <font-awesome-icon icon="times" type="button" aria-label="delete" class="delete-icon" @click="deleteTask(index)" />
-      </div>
+      <TodoItem style="animation-duration: 0.2s;" class="px-1 py-1" v-for="(task, index) in filteredTasks" :key="task.id" :task="task" :index="index" v-on:delete-task="deleteTask" v-on:done-edit="doneEdit"></TodoItem>
     </transition-group>
 
     <footer class="px-1 py-1">
@@ -82,27 +40,19 @@
 </template>
 
 <script>
+import TodoItem from './TodoItem.vue'
+
 export default {
   name: 'TodoList',
+  components: {
+    TodoItem
+  },
   data() {
     return {
-      formVisible: false,
-      newTask:  { title: '', desciption: '', date: '', completed: false, titleEditing: false, descriptionEditing: false, taskEditing: false },
+      newTask:  { id: 0, title: '', description: '', date: '', completed: false, titleEditing: false, descriptionEditing: false, taskEditing: false },
       tasks: [],
-      /*
-      tasks: [
-        { title: 'Meeting w. E. You', description: 'Discuss about the future of Vue.js.', date: '2018-09-13', completed: false, titleEditing: false, descriptionEditing: false, taskEditing: false },
-        { title: 'Book Flight', description: 'Book flight with Etihad Airways to Paris.', date: '2018-09-10', completed: false, titleEditing: false, descriptionEditing: false, taskEditing: false },
-        { title: 'Haircut', description: '', date: '2018-09-11', completed: false, titleEditing: false, descriptionEditing: false, taskEditing: false },
-        { title: 'Bike Ride', description: 'Plan the best route.', date: '2018-09-12', completed: false, titleEditing: false, descriptionEditing: false, taskEditing: false },
-        { title: 'Email to M. Zuckerberg', description: '', date: '2018-09-14', completed: false, titleEditing: false, descriptionEditing: false, taskEditing: false }
-      ],
-      */
-      titleError: false,
-      beforeEditTitle: "",
-      beforeEditDescription: "",
-      beforeEditDate: "",
-      filter: "all"
+      filter: "all",
+      id: 1
     }
   },
   computed: {
@@ -119,35 +69,27 @@ export default {
       return this.tasks.filter(task => { return !task.completed }).length;
     },
     filteredTasks: function() {
-      if (this.filter === 'all') {
+      if (this.filter == 'all') {
         return this.tasks;
       }
-      else if (this.filter === 'active') {
-        return this.tasks.filter(task => { return !task.completed});
+      else if (this.filter == 'active') {
+        return this.tasks.filter(task => { return !task.completed });
       }
-      else {
-        return this.tasks.filter(task => { return task.completed});
+      else if (this.filter == 'completed') {
+        return this.tasks.filter(task => { return task.completed });
       }
+      return this.tasks;
     },
     showClearBtn: function() {
       return this.tasks.filter(task => { return task.completed }).length > 0
-    }
-  },
-  // Register your own directive (i.e. v-focus). 
-  // All elements that have this directive, gain focus when the page loads.
-  directives: {
-    focus: {
-      inserted: function (el) {
-        // Focus the element
-        el.focus()
-      }
     }
   },
   methods: {
     addTask: function() {
       if (this.newTask.title) {
         this.tasks.push(this.newTask);
-        this.newTask = { title: '', desciption: '', date: '', completed: false, titleEditing: false, descriptionEditing: false, taskEditing: false };
+        this.newTask = { id: this.id, title: '', description: '', date: '', completed: false, titleEditing: false, descriptionEditing: false, taskEditing: false };
+        this.id++;
       }
     },
     deleteTask: function(index) {
@@ -169,59 +111,11 @@ export default {
         }
       });
     },
-    editTitle: function(task) {
-      this.beforeEditTitle = task.title;
-      task.titleEditing = true;
-    },
-    editDescription: function(task) {
-      this.beforeEditDescription = task.description;
-      task.descriptionEditing = true;
-    },
-    editTask: function(task) {
-      this.beforeEditTitle = task.title;
-      this.beforeEditDescription = task.description;
-      this.beforeEditDate = task.date;
-      task.taskEditing = true;
-    },
-    doneTitleEdit: function(task) {
-      // We don't want empty title strings
-      if (!task.title) {
-        task.title = this.beforeEditTitle;
-      }
-      task.titleEditing = false;
-    },
-    doneDescriptionEdit: function(task) {
-      task.descriptionEditing = false;
-    },
-    doneTaskEdit: function(task) {
-      // We dont' want an empty title string
-      if (task.title) {
-        this.titleError = false;
-        task.taskEditing = false;
-        return;
-      }
-      else {
-        this.titleError = true;
-        this.newTask.title = '';
-        return;
-      }
-    },
-    cancelTitleEdit: function(task) {
-      task.title = this.beforeEditTitle;
-      task.titleEditing = false;
-    },
-    cancelDescriptionEdit: function(task) {
-      task.description = this.beforeEditDescription;
-      task.descriptionEditing = false;
-    },
-    cancelTaskEdit: function(task) {
-      task.title = this.beforeEditTitle;
-      task.description = this.beforeEditDescription;
-      task.date = this.beforeEditDate;
-      task.taskEditing = false;
-    },
     clearCompleted: function() {
       this.tasks = this.tasks.filter(task => { return !task.completed });
+    },
+    doneEdit: function(data) {
+      this.tasks.splice(data.index, 1, data.task);
     }
   }
 }
@@ -248,84 +142,6 @@ export default {
     margin-bottom: 0.75rem;
   }
 
-  .delete-icon, .edit-icon {
-    cursor: pointer;
-    margin-left: 1.5rem;
-  }
-
-  .taskList {
-    display: flex;
-    align-items: center;
-    word-wrap: break-word;
-    word-break: break-word;
-    border-bottom: 1px solid rgba(0,0,0,.125);
-    min-height: 60px;
-    animation-duration: 0.2s; /* Animation duration for fadeInUp and fadeOutDown */
-  }
-
-  .toggle {
-    margin-right: 1.5rem;
-    cursor: pointer;
-  }
-
-  .taskList-content {
-    width: 100%;
-  }
-
-  .view-title {
-    font-size: 1rem;
-    font-weight: 600;
-    cursor: pointer;
-    width: 100%;
-  }
-
-  .view-description {
-    font-size: .8rem;
-    font-weight: 400;
-    cursor: pointer;
-    width: 100%;
-  }
-
-  .edit-title {
-    font-size: 1rem;
-    font-weight: 600;
-    line-height: 1;
-    border: none;
-    color: #00d1b2;
-    width: 100%;
-  }
-
-  .edit-title:focus {
-    outline: none;
-  }
-
-  .edit-description {
-    font-size: 0.75rem;
-    font-weight: 400;
-    line-height: 1;
-    border: none;
-    color: #00d1b2;
-    width: 100%;
-  }
-
-  .edit-description:focus {
-    outline: none;
-  }
-
-  .completed {
-    text-decoration: line-through;
-  }
-
-  .delete {
-    margin-left: 1.5rem;
-  }
-
-  .edit-task {
-    background: #fff;
-    padding: 1rem;
-    border-radius: 5px;
-  }
-  
   .px-1 {
     padding-left: 1.5rem;
     padding-right: 1.5rem;
